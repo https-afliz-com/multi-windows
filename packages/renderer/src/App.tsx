@@ -5,48 +5,68 @@ import BrowserItem from './components/BrowserItem';
 import axios from 'axios';
 
 export const App = () => {
-  const [value, setValue] = React.useState('');
+  const [value, setValue] = React.useState<any>('');
   const [browserList, setBrowserList] = React.useState<any>([]);
   const divRef = useRef<HTMLDivElement>(null);
-  const [data, setData] = React.useState();
+  // const [data, setData] = React.useState();
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
+    const rest = await axios.get('https://coinmarketcap.com/currencies/ethereum/');
+    // console.log(rest);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rest.data, 'text/html');
+    const head = doc.getElementsByTagName('head')[0].innerHTML;
+    const realHead = document.getElementsByTagName('head')[0];
+    realHead.innerHTML = head;
+    const div = doc.querySelector(
+      '#__next > div.sc-239620eb-1.eoMCkR.global-layout-v2 > div > div.cmc-body-wrapper > div > div > div.sc-aef7b723-0.sc-a6bd470-0.gavgYW.coin-stats',
+    );
+    console.log(div);
+    const bounding = div?.getBoundingClientRect();
+    console.log(bounding);
+    // console.log(head);
+    // setData(div?.innerHTML);
+
     setBrowserList([
       ...browserList,
       {
         id: Math.random(),
         url: value,
-        components: (
-          <BrowserItem
-            key={Math.random()}
-            url={value}
-          />
-        ),
+        components: <BrowserItem data={div?.innerHTML} />,
       },
     ]);
     setValue('');
   };
 
-  useEffect(() => {
-    if (divRef.current) {
-      const fetchData = async () => {
-        const rest = await axios.get('https://vnexpress.net/');
-        console.log(rest);
-        setData(rest.data);
-      };
-      fetchData();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (divRef.current) {
+  //     const fetchData = async () => {
+  //       const rest = await axios.get('https://vnexpress.net/');
+  //       console.log(rest);
+  //       const parser = new DOMParser();
+  //       const doc = parser.parseFromString(rest.data, 'text/html');
+  //       const head = doc.getElementsByTagName('head')[0].innerHTML;
+  //       const realHead = document.getElementsByTagName('head')[0];
+  //       realHead.innerHTML = head;
+  //       const div = doc.querySelector('.section.section_topstory');
+  //       console.log(head);
+  //       // setData(div.innerHTML);
+  //     };
+  //     fetchData();
+  //   }
+  // }, []);
+
+  console.log('value', value);
 
   return (
     <>
       <div
-        style={{width: '500px', height: '500px', position: 'relative'}}
+        style={{width: '1920', height: '1080px', position: 'relative'}}
         className="wrapper-content"
         ref={divRef}
       >
         {/* <div dangerouslySetInnerHTML={{__html: data}}></div> */}
-        {/* <Space
+        <Space
           style={{border: 'solid 1px black', background: 'grey'}}
           onCreate={viewPort => {
             // viewPort.setBounds({x: [0, 800], y: [0, 600]});
@@ -63,7 +83,7 @@ export const App = () => {
               return item.components;
             })}
           </NoPanArea>
-        </Space> */}
+        </Space>
       </div>
       {/* <webview
         id="foo"
